@@ -1,0 +1,137 @@
+name: Unity CI
+
+on:
+  workflow_dispatch:
+    inputs:
+      projectPath:
+        description: Path to the Unity project
+        required: true
+        default: .
+      unityVersion:
+        description: Unity version, or auto to read ProjectVersion.txt
+        required: true
+        default: auto
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  checks: write
+
+env:
+  UNITY_PROJECT_PATH: ${{ inputs.projectPath || '.' }}
+  UNITY_VERSION: ${{ inputs.unityVersion || 'auto' }}
+
+jobs:
+  tests:
+    name: Unity ${{ matrix.testMode }} tests
+    runs-on: [self-hosted, linux, x64, unity-main, build-node, proxmox]
+    strategy:
+      fail-fast: false
+      matrix:
+        testMode: [editmode, playmode]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
+
+      - name: Restore Unity Library cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.UNITY_PROJECT_PATH }}/Library
+          key: >-
+            unity-library-${{ runner.os }}-${{ matrix.testMode }}-
+            ${{ hashFiles(format('{0}/Packages/manifest.json', env.UNITY_PROJECT_PATH),
+            format('{0}/Packages/packages-lock.json', env.UNITY_PROJECT_PATH),
+            format('{0}/ProjectSettings/ProjectVersion.txt', env.UNITY_PROJECT_PATH)) }}
+          restore-keys: |
+            unity-library-${{ runner.os }}-${{ matrix.testMode }}-
+            unity-library-${{ runner.os }}-
+
+      - name: Run Unity tests
+        id: tests
+        uses: game-ci/unity-test-runner@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: ${{ env.UNITY_PROJECT_PATH }}
+          unityVersion: ${{ env.UNITY_VERSION }}
+          testMode: ${{ matrix.testMode }}
+          artifactsPath: test-results/${{ matrix.testMode }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          checkName: Unity ${{ matrix.testMode }} tests
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unity-test-results-${{ matrix.testMode }}
+          path: ${{ steps.tests.outputs.artifactsPath }}
+          if-no-files-found: warn
+
+  build:
+    name: Build ${{ matrix.name }}
+    needs: tests
+    runs-on: [self-hosted, linux, x64, unity-main, build-node, proxmox]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows
+            targetPlatform: StandaloneWindows64
+            customParameters: ""
+          - name: Linux-Server
+            targetPlatform: StandaloneLinux64
+            customParameters: -standaloneBuildSubtarget Server
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
+
+      - name: Restore Unity Library cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.UNITY_PROJECT_PATH }}/Library
+          key: >-
+            unity-library-${{ runner.os }}-${{ matrix.targetPlatform }}-
+            ${{ hashFiles(format('{0}/Packages/manifest.json', env.UNITY_PROJECT_PATH),
+            format('{0}/Packages/packages-lock.json', env.UNITY_PROJECT_PATH),
+            format('{0}/ProjectSettings/ProjectVersion.txt', env.UNITY_PROJECT_PATH)) }}
+          restore-keys: |
+            unity-library-${{ runner.os }}-${{ matrix.targetPlatform }}-
+            unity-library-${{ runner.os }}-
+
+      - name: Build Unity project
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: ${{ env.UNITY_PROJECT_PATH }}
+          unityVersion: ${{ env.UNITY_VERSION }}
+          targetPlatform: ${{ matrix.targetPlatform }}
+          customParameters: ${{ matrix.customParameters }}
+          buildsPath: build
+
+      - name: Publish build to NAS (Z:/UnityBuild)
+        if: success()
+        run: |
+          DEST="/mnt/unity-build/Multiplayer-FPS/${{ github.run_number }}/${{ matrix.name }}"
+          mkdir -p "$DEST"
+          rsync -a "build/${{ matrix.targetPlatform }}/" "$DEST/"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: unity-build-${{ matrix.name }}
+          path: build/${{ matrix.targetPlatform }}
+          if-no-files-found: error
