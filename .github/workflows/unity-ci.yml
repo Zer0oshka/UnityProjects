@@ -30,9 +30,16 @@ jobs:
     runs-on: [self-hosted, linux, x64, unity-main, build-node, proxmox]
     strategy:
       fail-fast: false
+      max-parallel: 1
       matrix:
         testMode: [editmode, playmode]
     steps:
+      - name: Fix workspace permissions
+        run: |
+          if [ -n "${RUNNER_WORKSPACE:-}" ] && [ -d "$RUNNER_WORKSPACE" ]; then
+            sudo chown -R "$(id -u)":"$(id -g)" "$RUNNER_WORKSPACE"
+          fi
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -66,6 +73,7 @@ jobs:
           artifactsPath: test-results/${{ matrix.testMode }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           checkName: Unity ${{ matrix.testMode }} tests
+          runAsHostUser: true
 
       - name: Upload test results
         if: always()
@@ -81,6 +89,7 @@ jobs:
     runs-on: [self-hosted, linux, x64, unity-main, build-node, proxmox]
     strategy:
       fail-fast: false
+      max-parallel: 1
       matrix:
         include:
           - name: Windows
@@ -90,6 +99,12 @@ jobs:
             targetPlatform: StandaloneLinux64
             customParameters: -standaloneBuildSubtarget Server
     steps:
+      - name: Fix workspace permissions
+        run: |
+          if [ -n "${RUNNER_WORKSPACE:-}" ] && [ -d "$RUNNER_WORKSPACE" ]; then
+            sudo chown -R "$(id -u)":"$(id -g)" "$RUNNER_WORKSPACE"
+          fi
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -121,6 +136,7 @@ jobs:
           targetPlatform: ${{ matrix.targetPlatform }}
           customParameters: ${{ matrix.customParameters }}
           buildsPath: build
+          runAsHostUser: true
 
       - name: Publish build to NAS (Z:/UnityBuild)
         if: success()
