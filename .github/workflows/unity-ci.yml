@@ -63,7 +63,6 @@ jobs:
         id: tests
         uses: game-ci/unity-test-runner@v4
         env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
@@ -136,7 +135,14 @@ jobs:
           targetPlatform: ${{ matrix.targetPlatform }}
           customParameters: ${{ matrix.customParameters }}
           buildsPath: build
-          runAsHostUser: true
+          runAsHostUser: false
+
+      - name: Fix workspace permissions after build
+        if: always()
+        run: |
+          if [ -n "${RUNNER_WORKSPACE:-}" ] && [ -d "$RUNNER_WORKSPACE" ]; then
+            sudo chown -R "$(id -u)":"$(id -g)" "$RUNNER_WORKSPACE"
+          fi
 
       - name: Publish build to NAS (Z:/UnityBuild)
         if: success()
