@@ -35,10 +35,7 @@ jobs:
         testMode: [editmode, playmode]
     steps:
       - name: Fix workspace permissions
-        run: |
-          if [ -n "${RUNNER_WORKSPACE:-}" ] && [ -d "$RUNNER_WORKSPACE" ]; then
-            sudo chown -R "$(id -u)":"$(id -g)" "$RUNNER_WORKSPACE"
-          fi
+        run: sudo chown -R "$(id -u)":"$(id -g)" /srv/unity-ci/projects
 
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -99,10 +96,7 @@ jobs:
             customParameters: -standaloneBuildSubtarget Server
     steps:
       - name: Fix workspace permissions
-        run: |
-          if [ -n "${RUNNER_WORKSPACE:-}" ] && [ -d "$RUNNER_WORKSPACE" ]; then
-            sudo chown -R "$(id -u)":"$(id -g)" "$RUNNER_WORKSPACE"
-          fi
+        run: sudo chown -R "$(id -u)":"$(id -g)" /srv/unity-ci/projects
 
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -139,10 +133,7 @@ jobs:
 
       - name: Fix workspace permissions after build
         if: always()
-        run: |
-          if [ -n "${RUNNER_WORKSPACE:-}" ] && [ -d "$RUNNER_WORKSPACE" ]; then
-            sudo chown -R "$(id -u)":"$(id -g)" "$RUNNER_WORKSPACE"
-          fi
+        run: sudo chown -R "$(id -u)":"$(id -g)" /srv/unity-ci/projects
 
       - name: Publish build to NAS (Z:/UnityBuild)
         if: success()
