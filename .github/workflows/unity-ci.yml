@@ -79,24 +79,20 @@ jobs:
           path: ${{ steps.tests.outputs.artifactsPath }}
           if-no-files-found: warn
 
-  build:
-    name: Build ${{ matrix.name }}
+  build-windows:
+    name: Build Windows
     needs: tests
     runs-on: [self-hosted, linux, x64, unity-main, build-node, proxmox]
-    strategy:
-      fail-fast: false
-      max-parallel: 1
-      matrix:
-        include:
-          - name: Windows
-            targetPlatform: StandaloneWindows64
-            customParameters: ""
-          - name: Linux-Server
-            targetPlatform: StandaloneLinux64
-            customParameters: -standaloneBuildSubtarget Server
     steps:
       - name: Fix workspace permissions
         run: sudo chown -R "$(id -u)":"$(id -g)" /srv/unity-ci/projects
+
+      - name: Ensure NAS mount
+        run: |
+          if ! mountpoint -q /mnt/storage; then
+            sudo systemctl start mnt-storage.mount || sudo systemctl start mnt-storage-retry.service
+          fi
+          test -d /mnt/storage/UnityBuild
 
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -109,12 +105,12 @@ jobs:
         with:
           path: ${{ env.UNITY_PROJECT_PATH }}/Library
           key: >-
-            unity-library-${{ runner.os }}-${{ matrix.targetPlatform }}-
+            unity-library-${{ runner.os }}-StandaloneWindows64-
             ${{ hashFiles(format('{0}/Packages/manifest.json', env.UNITY_PROJECT_PATH),
             format('{0}/Packages/packages-lock.json', env.UNITY_PROJECT_PATH),
             format('{0}/ProjectSettings/ProjectVersion.txt', env.UNITY_PROJECT_PATH)) }}
           restore-keys: |
-            unity-library-${{ runner.os }}-${{ matrix.targetPlatform }}-
+            unity-library-${{ runner.os }}-StandaloneWindows64-
             unity-library-${{ runner.os }}-
 
       - name: Build Unity project
@@ -126,10 +122,10 @@ jobs:
         with:
           projectPath: ${{ env.UNITY_PROJECT_PATH }}
           unityVersion: ${{ env.UNITY_VERSION }}
-          targetPlatform: ${{ matrix.targetPlatform }}
-          customParameters: ${{ matrix.customParameters }}
+          targetPlatform: StandaloneWindows64
           buildsPath: build
           runAsHostUser: false
+          dockerMemoryLimit: 16384
 
       - name: Fix workspace permissions after build
         if: always()
@@ -138,13 +134,80 @@ jobs:
       - name: Publish build to NAS (Z:/UnityBuild)
         if: success()
         run: |
-          DEST="/mnt/unity-build/Multiplayer-FPS/${{ github.run_number }}/${{ matrix.name }}"
+          DEST="/mnt/storage/UnityBuild/Multiplayer-FPS/${{ github.run_number }}/Windows"
           mkdir -p "$DEST"
-          rsync -a "build/${{ matrix.targetPlatform }}/" "$DEST/"
+          rsync -a "build/StandaloneWindows64/" "$DEST/"
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: unity-build-${{ matrix.name }}
-          path: build/${{ matrix.targetPlatform }}
+          name: unity-build-Windows
+          path: build/StandaloneWindows64
+          if-no-files-found: error
+
+  build-linux:
+    name: Build Linux-Server
+    needs: [tests, build-windows]
+    runs-on: [self-hosted, linux, x64, unity-main, build-node, proxmox]
+    steps:
+      - name: Fix workspace permissions
+        run: sudo chown -R "$(id -u)":"$(id -g)" /srv/unity-ci/projects
+
+      - name: Ensure NAS mount
+        run: |
+          if ! mountpoint -q /mnt/storage; then
+            sudo systemctl start mnt-storage.mount || sudo systemctl start mnt-storage-retry.service
+          fi
+          test -d /mnt/storage/UnityBuild
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
+
+      - name: Restore Unity Library cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.UNITY_PROJECT_PATH }}/Library
+          key: >-
+            unity-library-${{ runner.os }}-StandaloneLinux64-
+            ${{ hashFiles(format('{0}/Packages/manifest.json', env.UNITY_PROJECT_PATH),
+            format('{0}/Packages/packages-lock.json', env.UNITY_PROJECT_PATH),
+            format('{0}/ProjectSettings/ProjectVersion.txt', env.UNITY_PROJECT_PATH)) }}
+          restore-keys: |
+            unity-library-${{ runner.os }}-StandaloneLinux64-
+            unity-library-${{ runner.os }}-
+
+      - name: Build Unity project
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: ${{ env.UNITY_PROJECT_PATH }}
+          unityVersion: ${{ env.UNITY_VERSION }}
+          targetPlatform: StandaloneLinux64
+          customParameters: -standaloneBuildSubtarget Server
+          buildsPath: build
+          runAsHostUser: false
+          dockerMemoryLimit: 16384
+
+      - name: Fix workspace permissions after build
+        if: always()
+        run: sudo chown -R "$(id -u)":"$(id -g)" /srv/unity-ci/projects
+
+      - name: Publish build to NAS (Z:/UnityBuild)
+        if: success()
+        run: |
+          DEST="/mnt/storage/UnityBuild/Multiplayer-FPS/${{ github.run_number }}/Linux-Server"
+          mkdir -p "$DEST"
+          rsync -a "build/StandaloneLinux64/" "$DEST/"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: unity-build-Linux-Server
+          path: build/StandaloneLinux64
           if-no-files-found: error
