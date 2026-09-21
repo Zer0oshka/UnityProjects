@@ -196,7 +196,7 @@ namespace Unity.MP_FPS
                 GameManager.Instance.SoundSystem.SetListenerTransform(audioListener.transform);
             }
 
-            Utils.SetCursorVisible(false);
+            Utils.SetCursorVisible(GameSettings.Instance.IsPauseMenuOpen);
         }
 
         public void UpdateServer(float deltaTime)

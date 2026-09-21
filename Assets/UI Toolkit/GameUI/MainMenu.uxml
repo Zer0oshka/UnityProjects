@@ -21,7 +21,34 @@
                     <ui:Button text="Connect to Server" name="ConnectToServer" tabindex="4" selectable="true" />
                     <ui:Button text="Matchmake" name="QuickJoin" tabindex="5" enabled="true" class="section-separator hidden" style="display: none;" />
                     <ui:VisualElement name="Seperator" style="flex-grow: 1; height: 16px;" />
-                    <ui:Button text="Quit" name="QuitButton" tabindex="6" />
+                    <ui:Button text="Settings" name="SettingsButton" tabindex="6" />
+                    <ui:Button text="Quit" name="QuitButton" tabindex="7" />
+                </ui:VisualElement>
+                <ui:VisualElement name="SettingsPanel" picking-mode="Ignore" class="hidden">
+                    <ui:Label text="SETTINGS" class="menu-title" />
+                    <ui:VisualElement name="AudioSettingsPanel" class="settings-panel">
+                        <ui:VisualElement class="settings-row">
+                            <ui:Label text="Master" class="settings-label" />
+                            <ui:Slider name="MasterVolumeSlider" low-value="0" high-value="100" value="100" class="settings-slider" />
+                            <ui:Label name="MasterVolumeValue" text="100%" class="settings-value" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="settings-row">
+                            <ui:Label text="Music" class="settings-label" />
+                            <ui:Slider name="MusicVolumeSlider" low-value="0" high-value="100" value="100" class="settings-slider" />
+                            <ui:Label name="MusicVolumeValue" text="100%" class="settings-value" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="settings-row">
+                            <ui:Label text="SFX" class="settings-label" />
+                            <ui:Slider name="SfxVolumeSlider" low-value="0" high-value="100" value="100" class="settings-slider" />
+                            <ui:Label name="SfxVolumeValue" text="100%" class="settings-value" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="settings-row">
+                            <ui:Label text="Menu" class="settings-label" />
+                            <ui:Slider name="MenuVolumeSlider" low-value="0" high-value="100" value="100" class="settings-slider" />
+                            <ui:Label name="MenuVolumeValue" text="100%" class="settings-value" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:Button text="Back" name="SettingsBackButton" tabindex="8" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>

@@ -9,6 +9,7 @@ using UnityEngine;
 public partial class ClientInputReaderSystem : SystemBase
 {
     private float2 _accumulatedLook;
+    private int _lookSuppressFrames;
 
     private Entity _lastKnownPlayerEntity = Entity.Null;
 
@@ -63,30 +64,37 @@ public partial class ClientInputReaderSystem : SystemBase
 
             if (user.valid)
             {
-                var controls = (InputSystem_Actions)user.actions;
-
                 var playerInput = new PlayerInput();
-
-                ProcessGameplayInput(controls, ref playerInput);
-
-                // movement
-                float2 moveVector = controls.Player.Move.ReadValue<Vector2>();
-                playerInput.MoveInput = moveVector;
-
-                var addedDelta = (float2)controls.Player.LookDelta.ReadValue<Vector2>();
-
-                const float sensitivity = 3.7f;
-                var lookDelta = addedDelta * sensitivity;
-
-                // Accumulate the delta to our persistent rotation value
-                _accumulatedLook.x += lookDelta.x;
-                _accumulatedLook.y -= lookDelta.y; // Pitch is typically inverted
-
-                // Clamp the vertical angle to prevent looking straight up/down and flipping
-                _accumulatedLook.y = math.clamp(_accumulatedLook.y, -85f, 85f);
-
-                // Assign the full, accumulated angle to the input struct
                 playerInput.LookYawPitchDegrees = _accumulatedLook;
+
+                if (GameSettings.Instance.IsPauseMenuOpen)
+                {
+                    _lookSuppressFrames = 2;
+                }
+                else if (_lookSuppressFrames > 0)
+                {
+                    _lookSuppressFrames--;
+                }
+                else
+                {
+                    var controls = (InputSystem_Actions)user.actions;
+
+                    ProcessGameplayInput(controls, ref playerInput);
+
+                    float2 moveVector = controls.Player.Move.ReadValue<Vector2>();
+                    playerInput.MoveInput = moveVector;
+
+                    var addedDelta = (float2)controls.Player.LookDelta.ReadValue<Vector2>();
+
+                    const float sensitivity = 3.7f;
+                    var lookDelta = addedDelta * sensitivity;
+
+                    _accumulatedLook.x += lookDelta.x;
+                    _accumulatedLook.y -= lookDelta.y;
+                    _accumulatedLook.y = math.clamp(_accumulatedLook.y, -85f, 85f);
+
+                    playerInput.LookYawPitchDegrees = _accumulatedLook;
+                }
 
                 input.ValueRW.SetInput(0, playerInput);
                 movementInput.ValueRW.SetInput(0, playerInput);

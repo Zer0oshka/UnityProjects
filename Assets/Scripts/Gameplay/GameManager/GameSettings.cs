@@ -165,6 +165,7 @@ namespace Unity.MP_FPS
 
                 m_IsPauseMenuOpen = value;
                 Utils.SetCursorVisible(value);
+                GameInput.SetGameplayMapsEnabled(!value);
                 Notify(PauseMenuStylePropertyName);
                 Notify(MobileControlsOpacityPropertyName);
             }

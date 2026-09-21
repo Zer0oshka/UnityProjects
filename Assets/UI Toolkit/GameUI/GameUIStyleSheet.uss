@@ -228,3 +228,55 @@ ProgressBar .unity-progress-bar__progress {
 .section-separator {
     margin-bottom: 20px;
 }
+
+.hidden {
+    display: none;
+}
+
+.pause-overlay {
+    background-color: rgba(0, 0, 0, 0.55);
+}
+
+.menu-panel {
+    min-width: 420px;
+}
+
+.menu-title {
+    font-size: 34px;
+    -unity-font-style: bold;
+    margin-bottom: 24px;
+    letter-spacing: 2px;
+    color: var(--color-default);
+}
+
+.settings-panel {
+    margin-bottom: 20px;
+    padding: 12px;
+    border-width: var(--border-width);
+    border-color: var(--color-border);
+    background-color: rgba(0, 0, 0, 0.25);
+}
+
+.settings-row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.settings-label {
+    width: 90px;
+    -unity-text-align: middle-left;
+    font-size: var(--font-size-xsmall);
+}
+
+.settings-slider {
+    flex-grow: 1;
+    margin-left: 8px;
+    margin-right: 8px;
+}
+
+.settings-value {
+    width: 56px;
+    -unity-text-align: middle-right;
+    font-size: var(--font-size-xsmall);
+}

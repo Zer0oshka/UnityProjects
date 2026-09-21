@@ -1,0 +1,272 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!200 &20000000
+ShaderVariantCollection:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: PreloadedShaderVariants
+  m_Shaders:
+  - first: {fileID: 4800000, guid: 933532a4fcc9baf4fa0491de14d08ed7, type: 3}
+    second:
+      variants:
+      - keywords: 
+        passType: 8
+      - keywords: 
+        passType: 11
+      - keywords: 
+        passType: 12
+      - keywords: 
+        passType: 13
+      - keywords: DIRLIGHTMAP_COMBINED LIGHTMAP_ON
+        passType: 13
+      - keywords: DIRLIGHTMAP_COMBINED LIGHTMAP_ON _ALPHAPREMULTIPLY_ON _SURFACE_TYPE_TRANSPARENT
+        passType: 13
+      - keywords: DIRLIGHTMAP_COMBINED LIGHTMAP_ON _EMISSION _METALLICSPECGLOSSMAP _NORMALMAP
+        passType: 13
+      - keywords: LIGHTMAP_ON
+        passType: 13
+      - keywords: LIGHTMAP_ON LIGHTMAP_SHADOW_MIXING SHADOWS_SHADOWMASK
+        passType: 13
+      - keywords: LIGHTMAP_ON LIGHTMAP_SHADOW_MIXING SHADOWS_SHADOWMASK _ALPHAPREMULTIPLY_ON _SURFACE_TYPE_TRANSPARENT
+        passType: 13
+      - keywords: LIGHTMAP_ON LIGHTMAP_SHADOW_MIXING SHADOWS_SHADOWMASK _EMISSION _METALLICSPECGLOSSMAP _NORMALMAP
+        passType: 13
+      - keywords: LIGHTMAP_ON PROBE_VOLUMES_L1 SHADOWS_SHADOWMASK _ALPHAPREMULTIPLY_ON _CLUSTER_LIGHT_LOOP _LIGHT_LAYERS _SURFACE_TYPE_TRANSPARENT
+        passType: 13
+      - keywords: LIGHTMAP_ON PROBE_VOLUMES_L1 SHADOWS_SHADOWMASK _CLUSTER_LIGHT_LOOP _EMISSION _LIGHT_LAYERS _METALLICSPECGLOSSMAP _NORMALMAP
+        passType: 13
+      - keywords: LIGHTMAP_ON PROBE_VOLUMES_L1 SHADOWS_SHADOWMASK _CLUSTER_LIGHT_LOOP _LIGHT_LAYERS
+        passType: 13
+      - keywords: LIGHTMAP_ON SHADOWS_SHADOWMASK
+        passType: 13
+      - keywords: LIGHTMAP_ON SHADOWS_SHADOWMASK _ALPHAPREMULTIPLY_ON _CLUSTER_LIGHT_LOOP _SURFACE_TYPE_TRANSPARENT
+        passType: 13
+      - keywords: LIGHTMAP_ON SHADOWS_SHADOWMASK _ALPHAPREMULTIPLY_ON _SURFACE_TYPE_TRANSPARENT
+        passType: 13
+      - keywords: LIGHTMAP_ON SHADOWS_SHADOWMASK _CLUSTER_LIGHT_LOOP
+        passType: 13
+      - keywords: LIGHTMAP_ON SHADOWS_SHADOWMASK _CLUSTER_LIGHT_LOOP _EMISSION _METALLICSPECGLOSSMAP _NORMALMAP
+        passType: 13
+      - keywords: LIGHTMAP_ON SHADOWS_SHADOWMASK _EMISSION _METALLICSPECGLOSSMAP _NORMALMAP
+        passType: 13
+      - keywords: LIGHTMAP_ON _ALPHAPREMULTIPLY_ON _CLUSTER_LIGHT_LOOP _SURFACE_TYPE_TRANSPARENT
+        passType: 13
+      - keywords: LIGHTMAP_ON _ALPHAPREMULTIPLY_ON _SURFACE_TYPE_TRANSPARENT
+        passType: 13
+      - keywords: LIGHTMAP_ON _CLUSTER_LIGHT_LOOP
+        passType: 13
+      - keywords: LIGHTMAP_ON _CLUSTER_LIGHT_LOOP _EMISSION _METALLICSPECGLOSSMAP _NORMALMAP
+        passType: 13
+      - keywords: LIGHTMAP_ON _EMISSION _METALLICSPECGLOSSMAP _NORMALMAP
+        passType: 13
+      - keywords: PROBE_VOLUMES_L1
+        passType: 13
+      - keywords: PROBE_VOLUMES_L1 _ALPHAPREMULTIPLY_ON _SURFACE_TYPE_TRANSPARENT
+        passType: 13
+      - keywords: PROBE_VOLUMES_L1 _EMISSION _METALLICSPECGLOSSMAP _NORMALMAP
+        passType: 13
+      - keywords: _ALPHAPREMULTIPLY_ON _CLUSTER_LIGHT_LOOP _SURFACE_TYPE_TRANSPARENT
+        passType: 13
+      - keywords: _ALPHAPREMULTIPLY_ON _DBUFFER_MRT3 _SURFACE_TYPE_TRANSPARENT
+        passType: 13
+      - keywords: _ALPHAPREMULTIPLY_ON _LIGHT_LAYERS _SURFACE_TYPE_TRANSPARENT
+        passType: 13
+      - keywords: _ALPHAPREMULTIPLY_ON _SURFACE_TYPE_TRANSPARENT
+        passType: 13
+      - keywords: _CLUSTER_LIGHT_LOOP
+        passType: 13
+      - keywords: _CLUSTER_LIGHT_LOOP _EMISSION _METALLICSPECGLOSSMAP _NORMALMAP
+        passType: 13
+      - keywords: _DBUFFER_MRT3
+        passType: 13
+      - keywords: _DBUFFER_MRT3 _EMISSION _METALLICSPECGLOSSMAP _NORMALMAP
+        passType: 13
+      - keywords: _EMISSION _LIGHT_LAYERS _METALLICSPECGLOSSMAP _NORMALMAP
+        passType: 13
+      - keywords: _EMISSION _METALLICSPECGLOSSMAP _NORMALMAP
+        passType: 13
+      - keywords: _LIGHT_LAYERS
+        passType: 13
+  - first: {fileID: -6465566751694194690, guid: 9b4e681081e2b4c469111bb649e2f7ee, type: 3}
+    second:
+      variants:
+      - keywords: 
+        passType: 13
+      - keywords: DIRLIGHTMAP_COMBINED LIGHTMAP_ON
+        passType: 13
+      - keywords: LIGHTMAP_ON
+        passType: 13
+      - keywords: LIGHTMAP_ON LIGHTMAP_SHADOW_MIXING SHADOWS_SHADOWMASK
+        passType: 13
+      - keywords: LIGHTMAP_ON SHADOWS_SHADOWMASK
+        passType: 13
+      - keywords: LIGHTMAP_ON SHADOWS_SHADOWMASK _CLUSTER_LIGHT_LOOP
+        passType: 13
+      - keywords: LIGHTMAP_ON _CLUSTER_LIGHT_LOOP
+        passType: 13
+      - keywords: PROBE_VOLUMES_L1
+        passType: 13
+      - keywords: _CLUSTER_LIGHT_LOOP
+        passType: 13
+      - keywords: _DBUFFER_MRT3
+        passType: 13
+  - first: {fileID: -6465566751694194690, guid: 524b62674498bba488deb77ca6a41e90, type: 3}
+    second:
+      variants:
+      - keywords: 
+        passType: 8
+      - keywords: 
+        passType: 11
+      - keywords: 
+        passType: 12
+      - keywords: 
+        passType: 13
+      - keywords: DIRLIGHTMAP_COMBINED LIGHTMAP_ON
+        passType: 13
+      - keywords: LIGHTMAP_ON
+        passType: 13
+      - keywords: LIGHTMAP_ON LIGHTMAP_SHADOW_MIXING SHADOWS_SHADOWMASK
+        passType: 13
+      - keywords: LIGHTMAP_ON PROBE_VOLUMES_L1 SHADOWS_SHADOWMASK _CLUSTER_LIGHT_LOOP _LIGHT_LAYERS
+        passType: 13
+      - keywords: LIGHTMAP_ON SHADOWS_SHADOWMASK
+        passType: 13
+      - keywords: LIGHTMAP_ON SHADOWS_SHADOWMASK _CLUSTER_LIGHT_LOOP
+        passType: 13
+      - keywords: LIGHTMAP_ON _CLUSTER_LIGHT_LOOP
+        passType: 13
+      - keywords: PROBE_VOLUMES_L1
+        passType: 13
+      - keywords: _CLUSTER_LIGHT_LOOP
+        passType: 13
+      - keywords: _DBUFFER_MRT3
+        passType: 13
+      - keywords: _LIGHT_LAYERS
+        passType: 13
+  - first: {fileID: -6465566751694194690, guid: c4bb68199a348db459cf2a8730e460fc, type: 3}
+    second:
+      variants:
+      - keywords: 
+        passType: 8
+      - keywords: 
+        passType: 11
+      - keywords: 
+        passType: 12
+      - keywords: 
+        passType: 13
+      - keywords: DIRLIGHTMAP_COMBINED LIGHTMAP_ON
+        passType: 13
+      - keywords: LIGHTMAP_ON
+        passType: 13
+      - keywords: LIGHTMAP_ON LIGHTMAP_SHADOW_MIXING SHADOWS_SHADOWMASK
+        passType: 13
+      - keywords: LIGHTMAP_ON PROBE_VOLUMES_L1 SHADOWS_SHADOWMASK _CLUSTER_LIGHT_LOOP _LIGHT_LAYERS
+        passType: 13
+      - keywords: LIGHTMAP_ON SHADOWS_SHADOWMASK
+        passType: 13
+      - keywords: LIGHTMAP_ON SHADOWS_SHADOWMASK _CLUSTER_LIGHT_LOOP
+        passType: 13
+      - keywords: LIGHTMAP_ON _CLUSTER_LIGHT_LOOP
+        passType: 13
+      - keywords: PROBE_VOLUMES_L1
+        passType: 13
+      - keywords: _CLUSTER_LIGHT_LOOP
+        passType: 13
+      - keywords: _DBUFFER_MRT3
+        passType: 13
+      - keywords: _LIGHT_LAYERS
+        passType: 13
+  - first: {fileID: -6465566751694194690, guid: 3c5fcce11d0b65c43a15e088ff4f23d5, type: 3}
+    second:
+      variants:
+      - keywords: 
+        passType: 8
+      - keywords: 
+        passType: 11
+      - keywords: 
+        passType: 12
+      - keywords: 
+        passType: 13
+      - keywords: DIRLIGHTMAP_COMBINED LIGHTMAP_ON
+        passType: 13
+      - keywords: LIGHTMAP_ON
+        passType: 13
+      - keywords: LIGHTMAP_ON LIGHTMAP_SHADOW_MIXING SHADOWS_SHADOWMASK
+        passType: 13
+      - keywords: LIGHTMAP_ON PROBE_VOLUMES_L1 SHADOWS_SHADOWMASK _CLUSTER_LIGHT_LOOP _LIGHT_LAYERS
+        passType: 13
+      - keywords: LIGHTMAP_ON SHADOWS_SHADOWMASK
+        passType: 13
+      - keywords: LIGHTMAP_ON SHADOWS_SHADOWMASK _CLUSTER_LIGHT_LOOP
+        passType: 13
+      - keywords: LIGHTMAP_ON _CLUSTER_LIGHT_LOOP
+        passType: 13
+      - keywords: PROBE_VOLUMES_L1
+        passType: 13
+      - keywords: _CLUSTER_LIGHT_LOOP
+        passType: 13
+      - keywords: _DBUFFER_MRT3
+        passType: 13
+      - keywords: _LIGHT_LAYERS
+        passType: 13
+  - first: {fileID: -6465566751694194690, guid: 5405ef7378c8cc04799b362c64947dd7, type: 3}
+    second:
+      variants:
+      - keywords: 
+        passType: 8
+      - keywords: 
+        passType: 12
+      - keywords: 
+        passType: 13
+      - keywords: _DBUFFER_MRT3
+        passType: 13
+      - keywords: _DBUFFER_MRT3 _SURFACE_TYPE_TRANSPARENT
+        passType: 13
+      - keywords: _SURFACE_TYPE_TRANSPARENT
+        passType: 13
+  - first: {fileID: -6465566751694194690, guid: 4c5fae647db033b4f9688d19f5fc24f4, type: 3}
+    second:
+      variants:
+      - keywords: 
+        passType: 8
+      - keywords: 
+        passType: 11
+      - keywords: 
+        passType: 12
+      - keywords: 
+        passType: 13
+      - keywords: DIRLIGHTMAP_COMBINED LIGHTMAP_ON
+        passType: 13
+      - keywords: LIGHTMAP_ON
+        passType: 13
+      - keywords: LIGHTMAP_ON LIGHTMAP_SHADOW_MIXING SHADOWS_SHADOWMASK
+        passType: 13
+      - keywords: LIGHTMAP_ON PROBE_VOLUMES_L1 SHADOWS_SHADOWMASK _CLUSTER_LIGHT_LOOP _LIGHT_LAYERS
+        passType: 13
+      - keywords: LIGHTMAP_ON SHADOWS_SHADOWMASK
+        passType: 13
+      - keywords: LIGHTMAP_ON SHADOWS_SHADOWMASK _CLUSTER_LIGHT_LOOP
+        passType: 13
+      - keywords: LIGHTMAP_ON _CLUSTER_LIGHT_LOOP
+        passType: 13
+      - keywords: PROBE_VOLUMES_L1
+        passType: 13
+      - keywords: _CLUSTER_LIGHT_LOOP
+        passType: 13
+      - keywords: _DBUFFER_MRT3
+        passType: 13
+      - keywords: _LIGHT_LAYERS
+        passType: 13
+  - first: {fileID: -6465566751694194690, guid: 23a807901eea0eb4a8bd9795f0d59531, type: 3}
+    second:
+      variants:
+      - keywords: 
+        passType: 8
+      - keywords: 
+        passType: 12
+      - keywords: 
+        passType: 13
+      - keywords: _DBUFFER_MRT3
+        passType: 13

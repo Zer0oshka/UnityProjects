@@ -1,3 +1,4 @@
+using Unity.MP_FPS.UI;
 using Unity.Properties;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -19,9 +20,15 @@ namespace Unity.MP_FPS.Client
             public const string StartHost = "StartHost";
             public const string ConnectToServer = "ConnectToServer";
             public const string QuitGame = "QuitButton";
+            public const string SettingsButton = "SettingsButton";
+            public const string SettingsBackButton = "SettingsBackButton";
+            public const string ConnectionPanel = "ConnectionPanel";
+            public const string SettingsPanel = "SettingsPanel";
         }
 
         VisualElement m_MainMenu;
+        VisualElement m_ConnectionPanel;
+        VisualElement m_SettingsPanel;
         RadioButtonGroup m_ChosseCharacterGroup;
         RadioButtonGroup m_ConnectionModeGroup;
         Label m_SessionNameLabel;
@@ -30,10 +37,14 @@ namespace Unity.MP_FPS.Client
         Button m_StartHostButton;
         Button m_ConnectToServerButton;
         Button m_QuitButton;
+        Button m_SettingsButton;
+        Button m_SettingsBackButton;
 
         void OnEnable()
         {
             m_MainMenu = GetComponent<UIDocument>().rootVisualElement;
+            m_ConnectionPanel = m_MainMenu.Q<VisualElement>(UIElementNames.ConnectionPanel);
+            m_SettingsPanel = m_MainMenu.Q<VisualElement>(UIElementNames.SettingsPanel);
 
             m_MainMenu.SetBinding("style.display", new DataBinding
             {
@@ -85,8 +96,16 @@ namespace Unity.MP_FPS.Client
             m_ConnectToServerButton = m_MainMenu.Q<Button>(UIElementNames.ConnectToServer);
             m_ConnectToServerButton.clicked += OnConnectToServerPressed;
 
+            m_SettingsButton = m_MainMenu.Q<Button>(UIElementNames.SettingsButton);
+            m_SettingsButton.clicked += OnSettingsPressed;
+
+            m_SettingsBackButton = m_MainMenu.Q<Button>(UIElementNames.SettingsBackButton);
+            m_SettingsBackButton.clicked += OnSettingsBackPressed;
+
             m_QuitButton = m_MainMenu.Q<Button>(UIElementNames.QuitGame);
             m_QuitButton.clicked += OnQuitPressed;
+
+            AudioSettingsPanel.Bind(m_SettingsPanel);
 
             var hidingBackground = m_MainMenu.Q<VisualElement>(UIElementNames.HidingBackground);
             hidingBackground.SetBinding("style.display", new DataBinding
@@ -97,6 +116,7 @@ namespace Unity.MP_FPS.Client
             });
 
             ToggleConnectionModeDisplay();
+            ShowConnectionPanel();
         }
 
         void OnDisable()
@@ -104,6 +124,8 @@ namespace Unity.MP_FPS.Client
             m_CreateGameButton.clicked -= OnCreateGamePressed;
             m_ConnectionModeGroup.UnregisterValueChangedCallback(OnConnectionModeChanged);
             m_ConnectToServerButton.clicked -= OnConnectToServerPressed;
+            m_SettingsButton.clicked -= OnSettingsPressed;
+            m_SettingsBackButton.clicked -= OnSettingsBackPressed;
             m_QuitButton.clicked -= OnQuitPressed;
         }
 
@@ -141,5 +163,21 @@ namespace Unity.MP_FPS.Client
         static void OnConnectToServerPressed() => GameManager.Instance.StartGameAsync(CreationType.ConnectAndJoin);
 
         static void OnQuitPressed() => GameManager.Instance.QuitAsync();
+
+        void OnSettingsPressed() => ShowSettingsPanel();
+
+        void OnSettingsBackPressed() => ShowConnectionPanel();
+
+        void ShowConnectionPanel()
+        {
+            m_ConnectionPanel.style.display = DisplayStyle.Flex;
+            m_SettingsPanel.style.display = DisplayStyle.None;
+        }
+
+        void ShowSettingsPanel()
+        {
+            m_ConnectionPanel.style.display = DisplayStyle.None;
+            m_SettingsPanel.style.display = DisplayStyle.Flex;
+        }
     }
 }
