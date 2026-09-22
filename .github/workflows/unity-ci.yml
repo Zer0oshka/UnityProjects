@@ -37,6 +37,9 @@ jobs:
       - name: Fix workspace permissions
         run: sudo chown -R "$(id -u)":"$(id -g)" /srv/unity-ci/projects
 
+      - name: Restore self-hosted action cache
+        run: sudo /opt/unity-ci/scripts/restore-actions-cache.sh
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -86,6 +89,9 @@ jobs:
     steps:
       - name: Fix workspace permissions
         run: sudo chown -R "$(id -u)":"$(id -g)" /srv/unity-ci/projects
+
+      - name: Restore self-hosted action cache
+        run: sudo /opt/unity-ci/scripts/restore-actions-cache.sh
 
       - name: Ensure NAS mount
         run: |
@@ -152,6 +158,9 @@ jobs:
     steps:
       - name: Fix workspace permissions
         run: sudo chown -R "$(id -u)":"$(id -g)" /srv/unity-ci/projects
+
+      - name: Restore self-hosted action cache
+        run: sudo /opt/unity-ci/scripts/restore-actions-cache.sh
 
       - name: Ensure NAS mount
         run: |
