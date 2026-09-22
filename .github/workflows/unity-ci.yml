@@ -131,7 +131,7 @@ jobs:
           targetPlatform: StandaloneWindows64
           buildsPath: build
           runAsHostUser: false
-          dockerMemoryLimit: 20480m
+          dockerMemoryLimit: 24576m
           dockerShmSize: 2048m
 
       - name: Free Docker memory after Windows build
@@ -211,7 +211,7 @@ jobs:
           customParameters: -standaloneBuildSubtarget Server
           buildsPath: build
           runAsHostUser: false
-          dockerMemoryLimit: 22800m
+          dockerMemoryLimit: 30400m
           dockerShmSize: 4096m
 
       - name: Fix workspace permissions after build
