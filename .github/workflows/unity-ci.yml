@@ -131,7 +131,12 @@ jobs:
           targetPlatform: StandaloneWindows64
           buildsPath: build
           runAsHostUser: false
-          dockerMemoryLimit: 16384m
+          dockerMemoryLimit: 20480m
+          dockerShmSize: 2048m
+
+      - name: Free Docker memory after Windows build
+        if: always()
+        run: docker system prune -af || true
 
       - name: Fix workspace permissions after build
         if: always()
@@ -188,6 +193,11 @@ jobs:
             unity-library-${{ runner.os }}-StandaloneLinux64-
             unity-library-${{ runner.os }}-
 
+      - name: Free memory before Linux IL2CPP build
+        run: |
+          docker system prune -af || true
+          free -h
+
       - name: Build Unity project
         uses: game-ci/unity-builder@v4
         env:
@@ -201,7 +211,8 @@ jobs:
           customParameters: -standaloneBuildSubtarget Server
           buildsPath: build
           runAsHostUser: false
-          dockerMemoryLimit: 16384m
+          dockerMemoryLimit: 22800m
+          dockerShmSize: 4096m
 
       - name: Fix workspace permissions after build
         if: always()
