@@ -125,7 +125,7 @@ jobs:
           targetPlatform: StandaloneWindows64
           buildsPath: build
           runAsHostUser: false
-          dockerMemoryLimit: 16384
+          dockerMemoryLimit: 16384m
 
       - name: Fix workspace permissions after build
         if: always()
@@ -192,7 +192,7 @@ jobs:
           customParameters: -standaloneBuildSubtarget Server
           buildsPath: build
           runAsHostUser: false
-          dockerMemoryLimit: 16384
+          dockerMemoryLimit: 16384m
 
       - name: Fix workspace permissions after build
         if: always()
