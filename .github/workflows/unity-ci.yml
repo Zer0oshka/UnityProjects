@@ -119,6 +119,13 @@ jobs:
             unity-library-${{ runner.os }}-StandaloneWindows64-
             unity-library-${{ runner.os }}-
 
+      - name: Free memory before Windows build
+        run: |
+          docker system prune -af || true
+          sync
+          sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches' || true
+          free -h
+
       - name: Build Unity project
         uses: game-ci/unity-builder@v4
         env:
@@ -131,7 +138,7 @@ jobs:
           targetPlatform: StandaloneWindows64
           buildsPath: build
           runAsHostUser: false
-          dockerMemoryLimit: 24576m
+          dockerMemoryLimit: 30400m
           dockerShmSize: 2048m
 
       - name: Free Docker memory after Windows build
@@ -196,6 +203,8 @@ jobs:
       - name: Free memory before Linux IL2CPP build
         run: |
           docker system prune -af || true
+          sync
+          sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches' || true
           free -h
 
       - name: Build Unity project
