@@ -220,8 +220,8 @@ jobs:
           customParameters: -standaloneBuildSubtarget Server
           buildsPath: build
           runAsHostUser: false
-          dockerMemoryLimit: 30400m
-          dockerShmSize: 4096m
+          dockerMemoryLimit: 32800m
+          dockerShmSize: 2048m
 
       - name: Fix workspace permissions after build
         if: always()
