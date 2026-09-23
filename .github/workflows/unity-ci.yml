@@ -217,11 +217,11 @@ jobs:
           projectPath: ${{ env.UNITY_PROJECT_PATH }}
           unityVersion: ${{ env.UNITY_VERSION }}
           targetPlatform: StandaloneLinux64
+          customImage: unityci/editor:ubuntu-6000.6.2f1-linux-mono-3
           customParameters: -standaloneBuildSubtarget Server
           buildsPath: build
           runAsHostUser: false
-          dockerMemoryLimit: 32800m
-          dockerShmSize: 2048m
+          dockerShmSize: 1025m
 
       - name: Fix workspace permissions after build
         if: always()
