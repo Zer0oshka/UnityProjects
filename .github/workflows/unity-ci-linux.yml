@@ -36,7 +36,7 @@ jobs:
     runs-on: [self-hosted, linux, x64, unity-main, build-node, proxmox]
     strategy:
       fail-fast: false
-      max-parallel: 1
+      max-parallel: 2
       matrix:
         testMode: [editmode, playmode]
     steps:
@@ -51,19 +51,6 @@ jobs:
         with:
           fetch-depth: 0
           lfs: true
-
-      - name: Restore Unity Library cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.UNITY_PROJECT_PATH }}/Library
-          key: >-
-            unity-library-${{ runner.os }}-${{ matrix.testMode }}-
-            ${{ hashFiles(format('{0}/Packages/manifest.json', env.UNITY_PROJECT_PATH),
-            format('{0}/Packages/packages-lock.json', env.UNITY_PROJECT_PATH),
-            format('{0}/ProjectSettings/ProjectVersion.txt', env.UNITY_PROJECT_PATH)) }}
-          restore-keys: |
-            unity-library-${{ runner.os }}-${{ matrix.testMode }}-
-            unity-library-${{ runner.os }}-
 
       - name: Run Unity tests
         id: tests
@@ -113,24 +100,9 @@ jobs:
           fetch-depth: 0
           lfs: true
 
-      - name: Restore Unity Library cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.UNITY_PROJECT_PATH }}/Library
-          key: >-
-            unity-library-${{ runner.os }}-StandaloneLinux64-
-            ${{ hashFiles(format('{0}/Packages/manifest.json', env.UNITY_PROJECT_PATH),
-            format('{0}/Packages/packages-lock.json', env.UNITY_PROJECT_PATH),
-            format('{0}/ProjectSettings/ProjectVersion.txt', env.UNITY_PROJECT_PATH)) }}
-          restore-keys: |
-            unity-library-${{ runner.os }}-StandaloneLinux64-
-            unity-library-${{ runner.os }}-
-
       - name: Free memory before Linux IL2CPP build
         run: |
           docker system prune -af || true
-          sync
-          sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches' || true
           free -h
 
       - name: Build Unity project
@@ -143,7 +115,7 @@ jobs:
           projectPath: ${{ env.UNITY_PROJECT_PATH }}
           unityVersion: ${{ env.UNITY_VERSION }}
           targetPlatform: StandaloneLinux64
-          customParameters: -standaloneBuildSubtarget Server -additionalIl2CppArgs --jobs=2
+          customParameters: -standaloneBuildSubtarget Server -additionalIl2CppArgs --jobs=6
           buildsPath: build
           runAsHostUser: false
           dockerShmSize: 1025m
