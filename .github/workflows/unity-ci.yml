@@ -217,8 +217,7 @@ jobs:
           projectPath: ${{ env.UNITY_PROJECT_PATH }}
           unityVersion: ${{ env.UNITY_VERSION }}
           targetPlatform: StandaloneLinux64
-          customImage: unityci/editor:ubuntu-6000.6.2f1-linux-mono-3
-          customParameters: -standaloneBuildSubtarget Server
+          customParameters: -standaloneBuildSubtarget Server -additionalIl2CppArgs --jobs=2
           buildsPath: build
           runAsHostUser: false
           dockerShmSize: 1025m
