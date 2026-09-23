@@ -31,10 +31,10 @@ env:
 jobs:
   tests:
     name: Unity ${{ matrix.testMode }} tests
-    runs-on: [self-hosted, linux, x64, unity-test, proxmox]
+    runs-on: [self-hosted, linux, x64, unity-main, build-node, proxmox]
     strategy:
       fail-fast: false
-      max-parallel: 2
+      max-parallel: 1
       matrix:
         testMode: [editmode, playmode]
     steps:
@@ -76,7 +76,7 @@ jobs:
   build-windows:
     name: Build Windows
     needs: tests
-    runs-on: [self-hosted, linux, x64, unity-build, proxmox]
+    runs-on: [self-hosted, linux, x64, unity-main, build-node, proxmox]
     steps:
       - name: Fix workspace permissions
         run: sudo chown -R "$(id -u)":"$(id -g)" /srv/unity-ci/projects
@@ -136,8 +136,8 @@ jobs:
 
   build-linux:
     name: Build Linux-Server
-    needs: tests
-    runs-on: [self-hosted, linux, x64, unity-build, proxmox]
+    needs: [tests, build-windows]
+    runs-on: [self-hosted, linux, x64, unity-main, build-node, proxmox]
     steps:
       - name: Fix workspace permissions
         run: sudo chown -R "$(id -u)":"$(id -g)" /srv/unity-ci/projects

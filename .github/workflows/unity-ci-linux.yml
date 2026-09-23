@@ -33,7 +33,7 @@ jobs:
   tests:
     if: ${{ inputs.runTests }}
     name: Unity ${{ matrix.testMode }} tests
-    runs-on: [self-hosted, linux, x64, unity-test, proxmox]
+    runs-on: [self-hosted, linux, x64, unity-main, build-node, proxmox]
     strategy:
       fail-fast: false
       max-parallel: 2
@@ -79,7 +79,7 @@ jobs:
     name: Build Linux-Server
     needs: [tests]
     if: ${{ always() && (needs.tests.result == 'success' || needs.tests.result == 'skipped') }}
-    runs-on: [self-hosted, linux, x64, unity-build, proxmox]
+    runs-on: [self-hosted, linux, x64, unity-main, build-node, proxmox]
     steps:
       - name: Fix workspace permissions
         run: sudo chown -R "$(id -u)":"$(id -g)" /srv/unity-ci/projects
