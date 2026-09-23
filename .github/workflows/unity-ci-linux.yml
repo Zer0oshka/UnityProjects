@@ -1,4 +1,4 @@
-name: Unity CI
+name: Unity CI Linux Server
 
 on:
   workflow_dispatch:
@@ -11,15 +11,15 @@ on:
         description: Unity version, or auto to read ProjectVersion.txt
         required: true
         default: auto
-  pull_request:
-    branches: [main]
-  push:
-    branches: [main]
+      runTests:
+        description: Run Unity tests before Linux build
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   contents: read
   checks: write
-  actions: write
 
 concurrency:
   group: unity-self-hosted-${{ github.repository }}
@@ -31,6 +31,7 @@ env:
 
 jobs:
   tests:
+    if: ${{ inputs.runTests }}
     name: Unity ${{ matrix.testMode }} tests
     runs-on: [self-hosted, linux, x64, unity-main, build-node, proxmox]
     strategy:
@@ -87,9 +88,10 @@ jobs:
           path: ${{ steps.tests.outputs.artifactsPath }}
           if-no-files-found: warn
 
-  build-windows:
-    name: Build Windows
-    needs: tests
+  build-linux:
+    name: Build Linux-Server
+    needs: [tests]
+    if: ${{ always() && (needs.tests.result == 'success' || needs.tests.result == 'skipped') }}
     runs-on: [self-hosted, linux, x64, unity-main, build-node, proxmox]
     steps:
       - name: Fix workspace permissions
@@ -116,15 +118,15 @@ jobs:
         with:
           path: ${{ env.UNITY_PROJECT_PATH }}/Library
           key: >-
-            unity-library-${{ runner.os }}-StandaloneWindows64-
+            unity-library-${{ runner.os }}-StandaloneLinux64-
             ${{ hashFiles(format('{0}/Packages/manifest.json', env.UNITY_PROJECT_PATH),
             format('{0}/Packages/packages-lock.json', env.UNITY_PROJECT_PATH),
             format('{0}/ProjectSettings/ProjectVersion.txt', env.UNITY_PROJECT_PATH)) }}
           restore-keys: |
-            unity-library-${{ runner.os }}-StandaloneWindows64-
+            unity-library-${{ runner.os }}-StandaloneLinux64-
             unity-library-${{ runner.os }}-
 
-      - name: Free memory before Windows build
+      - name: Free memory before Linux IL2CPP build
         run: |
           docker system prune -af || true
           sync
@@ -140,10 +142,11 @@ jobs:
         with:
           projectPath: ${{ env.UNITY_PROJECT_PATH }}
           unityVersion: ${{ env.UNITY_VERSION }}
-          targetPlatform: StandaloneWindows64
+          targetPlatform: StandaloneLinux64
+          customParameters: -standaloneBuildSubtarget Server -additionalIl2CppArgs --jobs=2
           buildsPath: build
           runAsHostUser: false
-          dockerShmSize: 2048m
+          dockerShmSize: 1025m
 
       - name: Fix workspace permissions after build
         if: always()
@@ -152,30 +155,13 @@ jobs:
       - name: Publish build to NAS (Z:/UnityBuild)
         if: success()
         run: |
-          DEST="/mnt/storage/UnityBuild/Multiplayer-FPS/${{ github.run_number }}/Windows"
+          DEST="/mnt/storage/UnityBuild/Multiplayer-FPS/${{ github.run_number }}/Linux-Server"
           mkdir -p "$DEST"
-          rsync -a "build/StandaloneWindows64/" "$DEST/"
+          rsync -a "build/StandaloneLinux64/" "$DEST/"
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: unity-build-Windows
-          path: build/StandaloneWindows64
+          name: unity-build-Linux-Server
+          path: build/StandaloneLinux64
           if-no-files-found: error
-
-  trigger-linux-build:
-    name: Trigger Linux Server build
-    needs: tests
-    if: ${{ needs.tests.result == 'success' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Start isolated Linux IL2CPP workflow
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh workflow run unity-ci-linux.yml \
-            --repo "${{ github.repository }}" \
-            --ref "${{ github.ref_name }}" \
-            -f projectPath="${{ env.UNITY_PROJECT_PATH }}" \
-            -f unityVersion="${{ env.UNITY_VERSION }}" \
-            -f runTests=false
