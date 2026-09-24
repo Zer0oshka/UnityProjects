@@ -44,16 +44,19 @@ jobs:
         run: /opt/unity-ci/scripts/sync-workspace.sh ${{ github.sha }} ${{ github.ref_name }}
 
       - name: Run Unity tests
+        id: tests
+        uses: game-ci/unity-test-runner@v4
         env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-          UNITY_PATH: /opt/unity-ci/Unity
-        run: |
-          /opt/unity-ci/scripts/run-unity-tests.sh \
-            "${{ env.UNITY_PROJECT_PATH }}" \
-            "${{ matrix.testMode }}" \
-            "${{ env.UNITY_PROJECT_PATH }}/test-results/${{ matrix.testMode }}"
+        with:
+          projectPath: ${{ env.UNITY_PROJECT_PATH }}
+          unityVersion: ${{ env.UNITY_VERSION }}
+          testMode: ${{ matrix.testMode }}
+          artifactsPath: ${{ env.UNITY_PROJECT_PATH }}/test-results/${{ matrix.testMode }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          checkName: Unity ${{ matrix.testMode }} tests
+          runAsHostUser: true
 
   build-linux:
     name: Build Linux-Server
