@@ -1,152 +1,151 @@
-name: Unity CI
-
-on:
-  workflow_dispatch:
-    inputs:
-      unityVersion:
-        description: Unity version, or auto to read ProjectVersion.txt
-        required: true
-        default: auto
-  pull_request:
-    branches: [main]
-  push:
-    branches: [main]
-
-permissions:
-  contents: read
-  checks: write
-
-concurrency:
-  group: unity-self-hosted-${{ github.repository }}
-  cancel-in-progress: false
-
-env:
-  UNITY_WORKSPACE: /srv/unity-ci/workspace/Multiplayer-FPS
-  UNITY_PROJECT_PATH: .
-  UNITY_VERSION: ${{ inputs.unityVersion || 'auto' }}
-
-jobs:
-  tests:
-    name: Unity ${{ matrix.testMode }} tests
-    runs-on: [self-hosted, linux, x64, unity-main, build-node, proxmox]
-    strategy:
-      fail-fast: false
-      max-parallel: 1
-      matrix:
-        testMode: [editmode, playmode]
-    steps:
-      - name: Restore self-hosted action cache
-        run: sudo /opt/unity-ci/scripts/restore-actions-cache.sh
-
-      - name: Sync workspace from LAN mirror
-        run: /opt/unity-ci/scripts/sync-workspace.sh ${{ github.sha }} ${{ github.ref_name }}
-
-      - name: Link runner workspace to persistent project
-        run: /opt/unity-ci/scripts/link-runner-workspace.sh
-
-      - name: Run Unity tests
-        id: tests
-        uses: game-ci/unity-test-runner@v4
-        env:
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-        with:
-          projectPath: ${{ env.UNITY_PROJECT_PATH }}
-          unityVersion: ${{ env.UNITY_VERSION }}
-          testMode: ${{ matrix.testMode }}
-          artifactsPath: test-results/${{ matrix.testMode }}
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
-          checkName: Unity ${{ matrix.testMode }} tests
-          runAsHostUser: true
-
-  build-windows:
-    name: Build Windows
-    needs: tests
-    runs-on: [self-hosted, linux, x64, unity-main, build-node, proxmox]
-    steps:
-      - name: Restore self-hosted action cache
-        run: sudo /opt/unity-ci/scripts/restore-actions-cache.sh
-
-      - name: Ensure NAS mount
-        run: |
-          if ! mountpoint -q /mnt/storage; then
-            sudo systemctl start mnt-storage.mount || sudo systemctl start mnt-storage-retry.service
-          fi
-          test -d /mnt/storage/UnityBuild
-
-      - name: Sync workspace from LAN mirror
-        run: /opt/unity-ci/scripts/sync-workspace.sh ${{ github.sha }} ${{ github.ref_name }}
-
-      - name: Link runner workspace to persistent project
-        run: /opt/unity-ci/scripts/link-runner-workspace.sh
-
-      - name: Build Unity project
-        uses: game-ci/unity-builder@v4
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-        with:
-          projectPath: ${{ env.UNITY_PROJECT_PATH }}
-          unityVersion: ${{ env.UNITY_VERSION }}
-          targetPlatform: StandaloneWindows64
-          buildsPath: build
-          providerStrategy: local-system
-          localCacheEnabled: true
-          localCacheLibrary: true
-          skipActivation: false
-          runAsHostUser: true
-
-      - name: Publish build to NAS (Z:/UnityBuild)
-        if: success()
-        run: |
-          DEST="/mnt/storage/UnityBuild/Multiplayer-FPS/${{ github.run_number }}/Windows"
-          mkdir -p "$DEST"
-          rsync -a build/StandaloneWindows64/ "$DEST/"
-
-  build-linux:
-    name: Build Linux-Server
-    needs: [tests, build-windows]
-    runs-on: [self-hosted, linux, x64, unity-main, build-node, proxmox]
-    steps:
-      - name: Restore self-hosted action cache
-        run: sudo /opt/unity-ci/scripts/restore-actions-cache.sh
-
-      - name: Ensure NAS mount
-        run: |
-          if ! mountpoint -q /mnt/storage; then
-            sudo systemctl start mnt-storage.mount || sudo systemctl start mnt-storage-retry.service
-          fi
-          test -d /mnt/storage/UnityBuild
-
-      - name: Sync workspace from LAN mirror
-        run: /opt/unity-ci/scripts/sync-workspace.sh ${{ github.sha }} ${{ github.ref_name }}
-
-      - name: Link runner workspace to persistent project
-        run: /opt/unity-ci/scripts/link-runner-workspace.sh
-
-      - name: Build Unity project
-        uses: game-ci/unity-builder@v4
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-        with:
-          projectPath: ${{ env.UNITY_PROJECT_PATH }}
-          unityVersion: ${{ env.UNITY_VERSION }}
-          targetPlatform: StandaloneLinux64
-          customParameters: -standaloneBuildSubtarget Server -additionalIl2CppArgs --jobs=6
-          buildsPath: build
-          providerStrategy: local-system
-          localCacheEnabled: true
-          localCacheLibrary: true
-          skipActivation: false
-          runAsHostUser: true
-
-      - name: Publish build to NAS (Z:/UnityBuild)
-        if: success()
-        run: |
-          DEST="/mnt/storage/UnityBuild/Multiplayer-FPS/${{ github.run_number }}/Linux-Server"
-          mkdir -p "$DEST"
-          rsync -a build/StandaloneLinux64/ "$DEST/"
-
+name: Unity CI
+
+on:
+  workflow_dispatch:
+    inputs:
+      unityVersion:
+        description: Unity version, or auto to read ProjectVersion.txt
+        required: true
+        default: auto
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  checks: write
+
+concurrency:
+  group: unity-self-hosted-${{ github.repository }}
+  cancel-in-progress: false
+
+env:
+  UNITY_WORKSPACE: /srv/unity-ci/workspace/Multiplayer-FPS
+  UNITY_PROJECT_PATH: .
+  UNITY_VERSION: ${{ inputs.unityVersion || 'auto' }}
+
+jobs:
+  tests:
+    name: Unity ${{ matrix.testMode }} tests
+    runs-on: [self-hosted, linux, x64, unity-main, build-node, proxmox]
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        testMode: [editmode, playmode]
+    steps:
+      - name: Restore self-hosted action cache
+        run: sudo /opt/unity-ci/scripts/restore-actions-cache.sh
+
+      - name: Sync workspace from LAN mirror
+        run: /opt/unity-ci/scripts/sync-workspace.sh ${{ github.sha }} ${{ github.ref_name }}
+
+      - name: Link runner workspace to persistent project
+        run: /opt/unity-ci/scripts/link-runner-workspace.sh
+
+      - name: Run Unity tests
+        id: tests
+        uses: game-ci/unity-test-runner@v4
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: ${{ env.UNITY_PROJECT_PATH }}
+          unityVersion: ${{ env.UNITY_VERSION }}
+          testMode: ${{ matrix.testMode }}
+          artifactsPath: test-results/${{ matrix.testMode }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          checkName: Unity ${{ matrix.testMode }} tests
+          runAsHostUser: true
+
+  build-windows:
+    name: Build Windows
+    needs: tests
+    runs-on: [self-hosted, linux, x64, unity-main, build-node, proxmox]
+    steps:
+      - name: Restore self-hosted action cache
+        run: sudo /opt/unity-ci/scripts/restore-actions-cache.sh
+
+      - name: Ensure NAS mount
+        run: |
+          if ! mountpoint -q /mnt/storage; then
+            sudo systemctl start mnt-storage.mount || sudo systemctl start mnt-storage-retry.service
+          fi
+          test -d /mnt/storage/UnityBuild
+
+      - name: Sync workspace from LAN mirror
+        run: /opt/unity-ci/scripts/sync-workspace.sh ${{ github.sha }} ${{ github.ref_name }}
+
+      - name: Link runner workspace to persistent project
+        run: /opt/unity-ci/scripts/link-runner-workspace.sh
+
+      - name: Build Unity project
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: ${{ env.UNITY_PROJECT_PATH }}
+          unityVersion: ${{ env.UNITY_VERSION }}
+          targetPlatform: StandaloneWindows64
+          buildsPath: build
+          providerStrategy: local-system
+          localCacheEnabled: true
+          localCacheLibrary: true
+          skipActivation: false
+          runAsHostUser: false
+
+      - name: Publish build to NAS (Z:/UnityBuild)
+        if: success()
+        run: |
+          DEST="/mnt/storage/UnityBuild/Multiplayer-FPS/${{ github.run_number }}/Windows"
+          mkdir -p "$DEST"
+          rsync -a build/StandaloneWindows64/ "$DEST/"
+
+  build-linux:
+    name: Build Linux-Server
+    needs: [tests, build-windows]
+    runs-on: [self-hosted, linux, x64, unity-main, build-node, proxmox]
+    steps:
+      - name: Restore self-hosted action cache
+        run: sudo /opt/unity-ci/scripts/restore-actions-cache.sh
+
+      - name: Ensure NAS mount
+        run: |
+          if ! mountpoint -q /mnt/storage; then
+            sudo systemctl start mnt-storage.mount || sudo systemctl start mnt-storage-retry.service
+          fi
+          test -d /mnt/storage/UnityBuild
+
+      - name: Sync workspace from LAN mirror
+        run: /opt/unity-ci/scripts/sync-workspace.sh ${{ github.sha }} ${{ github.ref_name }}
+
+      - name: Link runner workspace to persistent project
+        run: /opt/unity-ci/scripts/link-runner-workspace.sh
+
+      - name: Build Unity project
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: ${{ env.UNITY_PROJECT_PATH }}
+          unityVersion: ${{ env.UNITY_VERSION }}
+          targetPlatform: StandaloneLinux64
+          customParameters: -standaloneBuildSubtarget Server -additionalIl2CppArgs --jobs=6
+          buildsPath: build
+          providerStrategy: local-system
+          localCacheEnabled: true
+          localCacheLibrary: true
+          skipActivation: false
+          runAsHostUser: false
+
+      - name: Publish build to NAS (Z:/UnityBuild)
+        if: success()
+        run: |
+          DEST="/mnt/storage/UnityBuild/Multiplayer-FPS/${{ github.run_number }}/Linux-Server"
+          mkdir -p "$DEST"
+          rsync -a build/StandaloneLinux64/ "$DEST/"
