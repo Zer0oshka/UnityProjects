@@ -3,10 +3,6 @@ name: Unity CI Linux Server
 on:
   workflow_dispatch:
     inputs:
-      projectPath:
-        description: Path to the Unity project
-        required: true
-        default: .
       unityVersion:
         description: Unity version, or auto to read ProjectVersion.txt
         required: true
@@ -26,7 +22,8 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  UNITY_PROJECT_PATH: ${{ inputs.projectPath || '.' }}
+  UNITY_WORKSPACE: /srv/unity-ci/workspace/Multiplayer-FPS
+  UNITY_PROJECT_PATH: /srv/unity-ci/workspace/Multiplayer-FPS
   UNITY_VERSION: ${{ inputs.unityVersion || 'auto' }}
 
 jobs:
@@ -36,44 +33,35 @@ jobs:
     runs-on: [self-hosted, linux, x64, unity-main, build-node, proxmox]
     strategy:
       fail-fast: false
-      max-parallel: 2
+      max-parallel: 1
       matrix:
         testMode: [editmode, playmode]
     steps:
-      - name: Fix workspace permissions
-        run: sudo chown -R "$(id -u)":"$(id -g)" /srv/unity-ci/projects
-
       - name: Restore self-hosted action cache
         run: sudo /opt/unity-ci/scripts/restore-actions-cache.sh
 
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          lfs: true
+      - name: Sync workspace from LAN mirror
+        run: /opt/unity-ci/scripts/sync-workspace.sh ${{ github.sha }} ${{ github.ref_name }}
 
       - name: Run Unity tests
         id: tests
         uses: game-ci/unity-test-runner@v4
         env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
           projectPath: ${{ env.UNITY_PROJECT_PATH }}
           unityVersion: ${{ env.UNITY_VERSION }}
           testMode: ${{ matrix.testMode }}
-          artifactsPath: test-results/${{ matrix.testMode }}
+          artifactsPath: ${{ env.UNITY_PROJECT_PATH }}/test-results/${{ matrix.testMode }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           checkName: Unity ${{ matrix.testMode }} tests
+          providerStrategy: local-system
+          localCacheEnabled: true
+          localCacheLibrary: true
+          skipActivation: false
           runAsHostUser: true
-
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: unity-test-results-${{ matrix.testMode }}
-          path: ${{ steps.tests.outputs.artifactsPath }}
-          if-no-files-found: warn
 
   build-linux:
     name: Build Linux-Server
@@ -81,9 +69,6 @@ jobs:
     if: ${{ always() && (needs.tests.result == 'success' || needs.tests.result == 'skipped') }}
     runs-on: [self-hosted, linux, x64, unity-main, build-node, proxmox]
     steps:
-      - name: Fix workspace permissions
-        run: sudo chown -R "$(id -u)":"$(id -g)" /srv/unity-ci/projects
-
       - name: Restore self-hosted action cache
         run: sudo /opt/unity-ci/scripts/restore-actions-cache.sh
 
@@ -94,16 +79,8 @@ jobs:
           fi
           test -d /mnt/storage/UnityBuild
 
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          lfs: true
-
-      - name: Free memory before Linux IL2CPP build
-        run: |
-          docker system prune -af || true
-          free -h
+      - name: Sync workspace from LAN mirror
+        run: /opt/unity-ci/scripts/sync-workspace.sh ${{ github.sha }} ${{ github.ref_name }}
 
       - name: Build Unity project
         uses: game-ci/unity-builder@v4
@@ -117,23 +94,15 @@ jobs:
           targetPlatform: StandaloneLinux64
           customParameters: -standaloneBuildSubtarget Server -additionalIl2CppArgs --jobs=6
           buildsPath: build
-          runAsHostUser: false
-          dockerShmSize: 1025m
-
-      - name: Fix workspace permissions after build
-        if: always()
-        run: sudo chown -R "$(id -u)":"$(id -g)" /srv/unity-ci/projects
+          providerStrategy: local-system
+          localCacheEnabled: true
+          localCacheLibrary: true
+          skipActivation: false
+          runAsHostUser: true
 
       - name: Publish build to NAS (Z:/UnityBuild)
         if: success()
         run: |
           DEST="/mnt/storage/UnityBuild/Multiplayer-FPS/${{ github.run_number }}/Linux-Server"
           mkdir -p "$DEST"
-          rsync -a "build/StandaloneLinux64/" "$DEST/"
-
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: unity-build-Linux-Server
-          path: build/StandaloneLinux64
-          if-no-files-found: error
+          rsync -a "${{ env.UNITY_PROJECT_PATH }}/build/StandaloneLinux64/" "$DEST/"
