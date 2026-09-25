@@ -91,11 +91,8 @@ jobs:
           unityVersion: ${{ env.UNITY_VERSION }}
           targetPlatform: StandaloneWindows64
           buildsPath: build
-          providerStrategy: local-system
-          localCacheEnabled: true
-          localCacheLibrary: true
-          skipActivation: false
-          runAsHostUser: false
+          runAsHostUser: true
+          dockerShmSize: 2048m
 
       - name: Publish build to NAS (Z:/UnityBuild)
         if: success()
@@ -137,11 +134,8 @@ jobs:
           targetPlatform: StandaloneLinux64
           customParameters: -standaloneBuildSubtarget Server -additionalIl2CppArgs --jobs=6
           buildsPath: build
-          providerStrategy: local-system
-          localCacheEnabled: true
-          localCacheLibrary: true
-          skipActivation: false
-          runAsHostUser: false
+          runAsHostUser: true
+          dockerShmSize: 2048m
 
       - name: Publish build to NAS (Z:/UnityBuild)
         if: success()
