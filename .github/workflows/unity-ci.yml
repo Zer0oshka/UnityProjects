@@ -63,6 +63,7 @@ jobs:
           artifactsPath: test-results/${{ matrix.testMode }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           checkName: Unity ${{ matrix.testMode }} tests
+          coverageEnabled: false
           runAsHostUser: true
 
   build-windows:
