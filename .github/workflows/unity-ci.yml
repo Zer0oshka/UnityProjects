@@ -1,4 +1,4 @@
-name: Unity CI
+﻿name: Unity CI
 
 on:
   workflow_dispatch:
@@ -21,7 +21,6 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  UNITY_WORKSPACE: /srv/unity-ci/workspace/Multiplayer-FPS
   UNITY_PROJECT_PATH: .
   UNITY_VERSION: ${{ inputs.unityVersion || 'auto' }}
 
@@ -29,6 +28,9 @@ jobs:
   tests:
     name: Unity ${{ matrix.testMode }} tests
     runs-on: [self-hosted, linux, x64, unity-main, build-node, proxmox]
+    env:
+      WORKSPACE_DIR: /srv/unity-ci/workspace/Multiplayer-FPS
+      UNITY_WORKSPACE: /srv/unity-ci/workspace/Multiplayer-FPS
     strategy:
       fail-fast: false
       max-parallel: 1
@@ -40,9 +42,13 @@ jobs:
 
       - name: Sync workspace from LAN mirror
         run: /opt/unity-ci/scripts/sync-workspace.sh ${{ github.sha }} ${{ github.ref_name }}
+        env:
+          WORKSPACE_DIR: ${{ env.WORKSPACE_DIR }}
 
       - name: Link runner workspace to persistent project
         run: /opt/unity-ci/scripts/link-runner-workspace.sh
+        env:
+          UNITY_WORKSPACE: ${{ env.UNITY_WORKSPACE }}
 
       - name: Run Unity tests
         id: tests
@@ -63,6 +69,9 @@ jobs:
     name: Build Windows
     needs: tests
     runs-on: [self-hosted, linux, x64, unity-main, build-node, proxmox]
+    env:
+      WORKSPACE_DIR: /srv/unity-ci/workspace/Multiplayer-FPS-win
+      UNITY_WORKSPACE: /srv/unity-ci/workspace/Multiplayer-FPS-win
     steps:
       - name: Restore self-hosted action cache
         run: sudo /opt/unity-ci/scripts/restore-actions-cache.sh
@@ -76,9 +85,13 @@ jobs:
 
       - name: Sync workspace from LAN mirror
         run: /opt/unity-ci/scripts/sync-workspace.sh ${{ github.sha }} ${{ github.ref_name }}
+        env:
+          WORKSPACE_DIR: ${{ env.WORKSPACE_DIR }}
 
       - name: Link runner workspace to persistent project
         run: /opt/unity-ci/scripts/link-runner-workspace.sh
+        env:
+          UNITY_WORKSPACE: ${{ env.UNITY_WORKSPACE }}
 
       - name: Build Unity project
         uses: game-ci/unity-builder@v4
@@ -103,8 +116,11 @@ jobs:
 
   build-linux:
     name: Build Linux-Server
-    needs: [tests, build-windows]
-    runs-on: [self-hosted, linux, x64, unity-main, build-node, proxmox]
+    needs: tests
+    runs-on: [self-hosted, linux, x64, unity-main-2, build-node, proxmox]
+    env:
+      WORKSPACE_DIR: /srv/unity-ci/workspace/Multiplayer-FPS-linux
+      UNITY_WORKSPACE: /srv/unity-ci/workspace/Multiplayer-FPS-linux
     steps:
       - name: Restore self-hosted action cache
         run: sudo /opt/unity-ci/scripts/restore-actions-cache.sh
@@ -118,9 +134,13 @@ jobs:
 
       - name: Sync workspace from LAN mirror
         run: /opt/unity-ci/scripts/sync-workspace.sh ${{ github.sha }} ${{ github.ref_name }}
+        env:
+          WORKSPACE_DIR: ${{ env.WORKSPACE_DIR }}
 
       - name: Link runner workspace to persistent project
         run: /opt/unity-ci/scripts/link-runner-workspace.sh
+        env:
+          UNITY_WORKSPACE: ${{ env.UNITY_WORKSPACE }}
 
       - name: Build Unity project
         uses: game-ci/unity-builder@v4
