@@ -25,17 +25,12 @@ env:
   UNITY_VERSION: ${{ inputs.unityVersion != 'auto' && inputs.unityVersion || '6000.6.2f1' }}
 
 jobs:
-  tests:
-    name: Unity ${{ matrix.testMode }} tests
+  test-editmode:
+    name: Unity editmode tests
     runs-on: [self-hosted, linux, x64, unity-main, build-node, proxmox]
     env:
       WORKSPACE_DIR: /srv/unity-ci/workspace/Multiplayer-FPS
       UNITY_WORKSPACE: /srv/unity-ci/workspace/Multiplayer-FPS
-    strategy:
-      fail-fast: false
-      max-parallel: 1
-      matrix:
-        testMode: [editmode, playmode]
     steps:
       - name: Restore self-hosted action cache
         run: sudo /opt/unity-ci/scripts/restore-actions-cache.sh
@@ -51,7 +46,6 @@ jobs:
           UNITY_WORKSPACE: ${{ env.UNITY_WORKSPACE }}
 
       - name: Run Unity tests
-        id: tests
         uses: game-ci/unity-test-runner@v4
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
@@ -59,16 +53,52 @@ jobs:
         with:
           projectPath: ${{ env.UNITY_PROJECT_PATH }}
           unityVersion: ${{ env.UNITY_VERSION }}
-          testMode: ${{ matrix.testMode }}
-          artifactsPath: test-results/${{ matrix.testMode }}
+          testMode: editmode
+          artifactsPath: test-results/editmode
           githubToken: ${{ secrets.GITHUB_TOKEN }}
-          checkName: Unity ${{ matrix.testMode }} tests
+          checkName: Unity editmode tests
+          coverageOptions: dontClear
+          runAsHostUser: true
+
+  test-playmode:
+    name: Unity playmode tests
+    needs: test-editmode
+    runs-on: [self-hosted, linux, x64, unity-main, build-node, proxmox]
+    env:
+      WORKSPACE_DIR: /srv/unity-ci/workspace/Multiplayer-FPS
+      UNITY_WORKSPACE: /srv/unity-ci/workspace/Multiplayer-FPS
+    steps:
+      - name: Restore self-hosted action cache
+        run: sudo /opt/unity-ci/scripts/restore-actions-cache.sh
+
+      - name: Sync workspace from LAN mirror
+        run: /opt/unity-ci/scripts/sync-workspace.sh ${{ github.sha }} ${{ github.ref_name }}
+        env:
+          WORKSPACE_DIR: ${{ env.WORKSPACE_DIR }}
+
+      - name: Link runner workspace to persistent project
+        run: /opt/unity-ci/scripts/link-runner-workspace.sh
+        env:
+          UNITY_WORKSPACE: ${{ env.UNITY_WORKSPACE }}
+
+      - name: Run Unity tests
+        uses: game-ci/unity-test-runner@v4
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: ${{ env.UNITY_PROJECT_PATH }}
+          unityVersion: ${{ env.UNITY_VERSION }}
+          testMode: playmode
+          artifactsPath: test-results/playmode
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          checkName: Unity playmode tests
           coverageOptions: dontClear
           runAsHostUser: true
 
   build-windows:
     name: Build Windows
-    needs: tests
+    needs: [test-editmode, test-playmode]
     runs-on: [self-hosted, linux, x64, unity-main, build-node, proxmox]
     env:
       WORKSPACE_DIR: /srv/unity-ci/workspace/Multiplayer-FPS-win
@@ -117,7 +147,7 @@ jobs:
 
   build-linux:
     name: Build Linux-Server
-    needs: tests
+    needs: [test-editmode, test-playmode]
     runs-on: [self-hosted, linux, x64, unity-main-2, build-node, proxmox]
     env:
       WORKSPACE_DIR: /srv/unity-ci/workspace/Multiplayer-FPS-linux
