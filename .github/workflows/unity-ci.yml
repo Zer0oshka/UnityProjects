@@ -22,7 +22,7 @@ concurrency:
 
 env:
   UNITY_PROJECT_PATH: .
-  UNITY_VERSION: ${{ inputs.unityVersion || 'auto' }}
+  UNITY_VERSION: ${{ inputs.unityVersion != 'auto' && inputs.unityVersion || '6000.6.2f1' }}
 
 jobs:
   tests:
