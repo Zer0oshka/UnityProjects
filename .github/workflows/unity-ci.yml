@@ -51,19 +51,12 @@ jobs:
           UNITY_WORKSPACE: ${{ env.UNITY_WORKSPACE }}
 
       - name: Run Unity tests
-        uses: game-ci/unity-test-runner@v4
+        run: /opt/unity-ci/scripts/run-unity-docker-tests.sh editmode test-results/editmode
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-        with:
-          projectPath: ${{ env.UNITY_PROJECT_PATH }}
-          unityVersion: ${{ env.UNITY_VERSION }}
-          testMode: editmode
-          artifactsPath: test-results/editmode
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
-          checkName: Unity editmode tests
-          coverageEnabled: false
-          runAsHostUser: true
+          UNITY_VERSION: ${{ env.UNITY_VERSION }}
+          UNITY_PROJECT_PATH: ${{ env.UNITY_PROJECT_PATH }}
 
       - name: Fix workspace permissions after tests
         if: always()
@@ -98,19 +91,12 @@ jobs:
           UNITY_WORKSPACE: ${{ env.UNITY_WORKSPACE }}
 
       - name: Run Unity tests
-        uses: game-ci/unity-test-runner@v4
+        run: /opt/unity-ci/scripts/run-unity-docker-tests.sh playmode test-results/playmode
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-        with:
-          projectPath: ${{ env.UNITY_PROJECT_PATH }}
-          unityVersion: ${{ env.UNITY_VERSION }}
-          testMode: playmode
-          artifactsPath: test-results/playmode
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
-          checkName: Unity playmode tests
-          coverageEnabled: false
-          runAsHostUser: true
+          UNITY_VERSION: ${{ env.UNITY_VERSION }}
+          UNITY_PROJECT_PATH: ${{ env.UNITY_PROJECT_PATH }}
 
       - name: Fix workspace permissions after tests
         if: always()
