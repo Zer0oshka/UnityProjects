@@ -124,19 +124,25 @@ jobs:
         env:
           UNITY_WORKSPACE: ${{ env.UNITY_WORKSPACE }}
 
-      - name: Build Unity project
-        uses: game-ci/unity-builder@v4
+      - name: Ensure cached Unity license for Docker
+        run: /opt/unity-ci/scripts/ensure-unity-license-docker.sh
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-        with:
-          projectPath: ${{ env.UNITY_PROJECT_PATH }}
-          unityVersion: ${{ env.UNITY_VERSION }}
-          targetPlatform: StandaloneWindows64
-          buildsPath: build
-          runAsHostUser: true
-          dockerShmSize: 2048m
+
+      - name: Build Unity project
+        run: |
+          UNITY_WORKSPACE="${{ env.UNITY_WORKSPACE }}" \
+          BUILD_TARGET=StandaloneWindows64 \
+          BUILD_NAME=StandaloneWindows64 \
+          BUILD_PATH=build/StandaloneWindows64 \
+          BUILD_FILE=StandaloneWindows64.exe \
+          DOCKER_MEMORY_LIMIT=15000m \
+          UNITY_EMAIL='${{ secrets.UNITY_EMAIL }}' \
+          UNITY_PASSWORD='${{ secrets.UNITY_PASSWORD }}' \
+          UNITY_LICENSE='${{ secrets.UNITY_LICENSE }}' \
+          /opt/unity-ci/scripts/unity-docker-build.sh
 
       - name: Publish build to NAS (Z:/UnityBuild)
         if: success()
@@ -173,20 +179,26 @@ jobs:
         env:
           UNITY_WORKSPACE: ${{ env.UNITY_WORKSPACE }}
 
-      - name: Build Unity project
-        uses: game-ci/unity-builder@v4
+      - name: Ensure cached Unity license for Docker
+        run: /opt/unity-ci/scripts/ensure-unity-license-docker.sh
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-        with:
-          projectPath: ${{ env.UNITY_PROJECT_PATH }}
-          unityVersion: ${{ env.UNITY_VERSION }}
-          targetPlatform: StandaloneLinux64
-          customParameters: -standaloneBuildSubtarget Server -additionalIl2CppArgs --jobs=6
-          buildsPath: build
-          runAsHostUser: true
-          dockerShmSize: 2048m
+
+      - name: Build Unity project
+        run: |
+          UNITY_WORKSPACE="${{ env.UNITY_WORKSPACE }}" \
+          BUILD_TARGET=StandaloneLinux64 \
+          BUILD_NAME=StandaloneLinux64 \
+          BUILD_PATH=build/StandaloneLinux64 \
+          BUILD_FILE=StandaloneLinux64 \
+          CUSTOM_PARAMETERS='-standaloneBuildSubtarget Server -additionalIl2CppArgs --jobs=4' \
+          DOCKER_MEMORY_LIMIT=15000m \
+          UNITY_EMAIL='${{ secrets.UNITY_EMAIL }}' \
+          UNITY_PASSWORD='${{ secrets.UNITY_PASSWORD }}' \
+          UNITY_LICENSE='${{ secrets.UNITY_LICENSE }}' \
+          /opt/unity-ci/scripts/unity-docker-build.sh
 
       - name: Publish build to NAS (Z:/UnityBuild)
         if: success()
