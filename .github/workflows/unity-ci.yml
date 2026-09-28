@@ -31,9 +31,13 @@ jobs:
     env:
       WORKSPACE_DIR: /srv/unity-ci/workspace/Multiplayer-FPS
       UNITY_WORKSPACE: /srv/unity-ci/workspace/Multiplayer-FPS
+      UNITY_PATH: /opt/unity-ci/Unity
     steps:
       - name: Restore self-hosted action cache
         run: sudo /opt/unity-ci/scripts/restore-actions-cache.sh
+
+      - name: Ensure native Unity
+        run: /opt/unity-ci/scripts/ensure-native-unity.sh
 
       - name: Sync workspace from LAN mirror
         run: /opt/unity-ci/scripts/sync-workspace.sh ${{ github.sha }} ${{ github.ref_name }}
@@ -45,24 +49,16 @@ jobs:
         env:
           UNITY_WORKSPACE: ${{ env.UNITY_WORKSPACE }}
 
-      - name: Prepare workspace for Unity Docker
+      - name: Prepare workspace
         run: /opt/unity-ci/scripts/prepare-unity-workspace.sh
         env:
           UNITY_WORKSPACE: ${{ env.UNITY_WORKSPACE }}
 
       - name: Run Unity tests
-        run: /opt/unity-ci/scripts/run-unity-docker-tests.sh editmode test-results/editmode
+        run: /opt/unity-ci/scripts/run-unity-tests.sh . editmode test-results/editmode
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-          UNITY_VERSION: ${{ env.UNITY_VERSION }}
-          UNITY_PROJECT_PATH: ${{ env.UNITY_PROJECT_PATH }}
-
-      - name: Fix workspace permissions after tests
-        if: always()
-        run: /opt/unity-ci/scripts/prepare-unity-workspace.sh
-        env:
-          UNITY_WORKSPACE: ${{ env.UNITY_WORKSPACE }}
 
   test-playmode:
     name: Unity playmode tests
@@ -71,9 +67,13 @@ jobs:
     env:
       WORKSPACE_DIR: /srv/unity-ci/workspace/Multiplayer-FPS
       UNITY_WORKSPACE: /srv/unity-ci/workspace/Multiplayer-FPS
+      UNITY_PATH: /opt/unity-ci/Unity
     steps:
       - name: Restore self-hosted action cache
         run: sudo /opt/unity-ci/scripts/restore-actions-cache.sh
+
+      - name: Ensure native Unity
+        run: /opt/unity-ci/scripts/ensure-native-unity.sh
 
       - name: Sync workspace from LAN mirror
         run: /opt/unity-ci/scripts/sync-workspace.sh ${{ github.sha }} ${{ github.ref_name }}
@@ -85,24 +85,16 @@ jobs:
         env:
           UNITY_WORKSPACE: ${{ env.UNITY_WORKSPACE }}
 
-      - name: Prepare workspace for Unity Docker
+      - name: Prepare workspace
         run: /opt/unity-ci/scripts/prepare-unity-workspace.sh
         env:
           UNITY_WORKSPACE: ${{ env.UNITY_WORKSPACE }}
 
       - name: Run Unity tests
-        run: /opt/unity-ci/scripts/run-unity-docker-tests.sh playmode test-results/playmode
+        run: /opt/unity-ci/scripts/run-unity-tests.sh . playmode test-results/playmode
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-          UNITY_VERSION: ${{ env.UNITY_VERSION }}
-          UNITY_PROJECT_PATH: ${{ env.UNITY_PROJECT_PATH }}
-
-      - name: Fix workspace permissions after tests
-        if: always()
-        run: /opt/unity-ci/scripts/prepare-unity-workspace.sh
-        env:
-          UNITY_WORKSPACE: ${{ env.UNITY_WORKSPACE }}
 
   build-windows:
     name: Build Windows
