@@ -63,7 +63,7 @@ jobs:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           checkName: Unity editmode tests
           coverageOptions: dontClear
-          runAsHostUser: true
+          runAsHostUser: false
 
       - name: Fix workspace permissions after tests
         if: always()
@@ -110,7 +110,7 @@ jobs:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           checkName: Unity playmode tests
           coverageOptions: dontClear
-          runAsHostUser: true
+          runAsHostUser: false
 
       - name: Fix workspace permissions after tests
         if: always()
