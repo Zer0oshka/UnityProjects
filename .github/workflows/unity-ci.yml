@@ -62,8 +62,8 @@ jobs:
           artifactsPath: test-results/editmode
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           checkName: Unity editmode tests
-          coverageOptions: dontClear
-          runAsHostUser: false
+          coverageEnabled: false
+          runAsHostUser: true
 
       - name: Fix workspace permissions after tests
         if: always()
@@ -109,8 +109,8 @@ jobs:
           artifactsPath: test-results/playmode
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           checkName: Unity playmode tests
-          coverageOptions: dontClear
-          runAsHostUser: false
+          coverageEnabled: false
+          runAsHostUser: true
 
       - name: Fix workspace permissions after tests
         if: always()
