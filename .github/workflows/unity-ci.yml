@@ -64,7 +64,6 @@ jobs:
           checkName: Unity editmode tests
           coverageOptions: dontClear
           runAsHostUser: true
-          dockerMemoryLimit: 22000m
 
       - name: Fix workspace permissions after tests
         if: always()
@@ -112,7 +111,6 @@ jobs:
           checkName: Unity playmode tests
           coverageOptions: dontClear
           runAsHostUser: true
-          dockerMemoryLimit: 22000m
 
       - name: Fix workspace permissions after tests
         if: always()
