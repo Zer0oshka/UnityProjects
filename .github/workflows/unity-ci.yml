@@ -141,7 +141,7 @@ jobs:
           targetPlatform: StandaloneWindows64
           buildsPath: build
           runAsHostUser: false
-          dockerMemoryLimit: 15000m
+          dockerMemoryLimit: 15360m
           dockerShmSize: 2048m
 
       - name: Fix workspace permissions after build
@@ -203,7 +203,7 @@ jobs:
           customParameters: -standaloneBuildSubtarget Server -additionalIl2CppArgs --jobs=4
           buildsPath: build
           runAsHostUser: false
-          dockerMemoryLimit: 15000m
+          dockerMemoryLimit: 15360m
           dockerShmSize: 2048m
 
       - name: Fix workspace permissions after build
