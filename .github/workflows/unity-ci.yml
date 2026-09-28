@@ -64,7 +64,13 @@ jobs:
           checkName: Unity editmode tests
           coverageOptions: dontClear
           runAsHostUser: true
-          dockerMemoryLimit: 12000m
+          dockerMemoryLimit: 22000m
+
+      - name: Fix workspace permissions after tests
+        if: always()
+        run: /opt/unity-ci/scripts/prepare-unity-workspace.sh
+        env:
+          UNITY_WORKSPACE: ${{ env.UNITY_WORKSPACE }}
 
   test-playmode:
     name: Unity playmode tests
@@ -106,7 +112,13 @@ jobs:
           checkName: Unity playmode tests
           coverageOptions: dontClear
           runAsHostUser: true
-          dockerMemoryLimit: 12000m
+          dockerMemoryLimit: 22000m
+
+      - name: Fix workspace permissions after tests
+        if: always()
+        run: /opt/unity-ci/scripts/prepare-unity-workspace.sh
+        env:
+          UNITY_WORKSPACE: ${{ env.UNITY_WORKSPACE }}
 
   build-windows:
     name: Build Windows
